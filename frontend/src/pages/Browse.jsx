@@ -1,97 +1,84 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import Input from "../components/ui/Input";
-import Button from "../components/ui/Button";
-import { useAuth } from "../hooks/useAuth";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
-export default function Register() {
-  const navigate = useNavigate();
-  const { register } = useAuth();
+import Navbar from "../components/layout/Navbar";
+import Loader from "../components/ui/Loader";
 
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+import { getAllMoviesApi, getThumbnailUrl } from "../api/movies.api.js";
+
+export default function Browse() {
+  const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
+  useEffect(() => {
+    const loadMovies = async () => {
+      try {
+        setError("");
+        setLoading(true);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      setError("");
-      setLoading(true);
+        const data = await getAllMoviesApi();
+        setMovies(data.movies || []);
+      } catch (err) {
+        setError(err?.response?.data?.message || "Failed to load movies");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      await register(form);
-      navigate("/browse");
-    } catch (err) {
-      setError(err?.response?.data?.message || "Register failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+    loadMovies();
+  }, []);
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="mx-auto flex min-h-screen max-w-md items-center px-4">
-        <form
-          onSubmit={handleSubmit}
-          className="w-full rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl"
-        >
-          <h1 className="text-2xl font-bold">Create Account</h1>
-          <p className="mt-1 text-sm text-white/60">
-            Register to start watching
-          </p>
+      <Navbar />
 
-          {error && (
-            <div className="mt-4 rounded-lg bg-red-500/10 p-3 text-sm text-red-400">
-              {error}
-            </div>
-          )}
+      <main className="pt-16">
+        {loading && <Loader text="Loading movies..." />}
 
-          <div className="mt-5 space-y-4">
-            <Input
-              label="Name"
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              placeholder="Enter name"
-              required
-            />
-
-            <Input
-              label="Email"
-              name="email"
-              type="email"
-              value={form.email}
-              onChange={handleChange}
-              placeholder="Enter email"
-              required
-            />
-
-            <Input
-              label="Password"
-              name="password"
-              type="password"
-              value={form.password}
-              onChange={handleChange}
-              placeholder="Enter password"
-              required
-            />
-
-            <Button disabled={loading} className="w-full">
-              {loading ? "Creating..." : "Create Account"}
-            </Button>
+        {error && (
+          <div className="mx-auto max-w-6xl px-4 py-6 text-red-400">
+            {error}
           </div>
+        )}
 
-          <p className="mt-5 text-center text-sm text-white/60">
-            Already have account?{" "}
-            <Link to="/login" className="text-red-500 hover:underline">
-              Sign in
-            </Link>
-          </p>
-        </form>
-      </div>
+        {!loading && !error && movies.length === 0 && (
+          <div className="mx-auto max-w-6xl px-4 py-10 text-white/70">
+            No movies found. Upload movies from Postman first.
+          </div>
+        )}
+
+        {!loading && movies.length > 0 && (
+          <div className="mx-auto max-w-6xl px-4 py-8">
+            <h1 className="mb-6 text-2xl font-bold">Browse Movies</h1>
+
+            <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              {movies.map((movie) => (
+                <Link
+                  key={movie._id}
+                  to={`/details/${movie._id}`}
+                  className="group overflow-hidden rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition"
+                >
+                  <img
+                    src={getThumbnailUrl(movie.thumbnailUrl)}
+                    alt={movie.title}
+                    className="h-64 w-full object-cover transition group-hover:scale-105"
+                  />
+
+                  <div className="p-4">
+                    <h2 className="font-semibold line-clamp-1">
+                      {movie.title}
+                    </h2>
+                    <p className="mt-1 text-sm text-white/60">
+                      {movie.genre || "Unknown"} • {movie.year || "-"}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+      </main>
     </div>
   );
 }

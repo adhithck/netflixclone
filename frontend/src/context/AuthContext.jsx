@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from "react";
-import { loginApi, profileApi, registerApi } from "../api/auth.api";
+import { loginApi, profileApi, registerApi } from "../api/auth.api.js";
 
 export const AuthContext = createContext(null);
 
@@ -18,15 +18,15 @@ export default function AuthProvider({ children }) {
           return;
         }
 
-        localStorage.setItem("token", token);
-
         const profile = await profileApi();
         setUser(profile);
       } catch (error) {
         console.log("Profile error:", error?.response?.data || error.message);
+
+        // ✅ IMPORTANT FIX:
+        // Do NOT remove token here while testing
+        // only set user null
         setUser(null);
-        setToken("");
-        localStorage.removeItem("token");
       } finally {
         setLoading(false);
       }
@@ -40,8 +40,11 @@ export default function AuthProvider({ children }) {
     const res = await registerApi(data);
 
     if (res?.token) {
-      setToken(res.token);
       localStorage.setItem("token", res.token);
+      setToken(res.token);
+
+      // ✅ optional: set user from response
+      if (res.user) setUser(res.user);
     }
 
     return res;
@@ -52,8 +55,11 @@ export default function AuthProvider({ children }) {
     const res = await loginApi(data);
 
     if (res?.token) {
-      setToken(res.token);
       localStorage.setItem("token", res.token);
+      setToken(res.token);
+
+      // ✅ optional: set user from response
+      if (res.user) setUser(res.user);
     }
 
     return res;
@@ -66,15 +72,19 @@ export default function AuthProvider({ children }) {
     localStorage.removeItem("token");
   };
 
-  const value = {
-    user,
-    token,
-    loading,
-    isLoggedIn: !!token,
-    register,
-    login,
-    logout,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        loading,
+        isLoggedIn: !!token,
+        register,
+        login,
+        logout,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }

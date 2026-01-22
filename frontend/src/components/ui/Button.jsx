@@ -1,10 +1,10 @@
 export default function Button({
   children,
-  type = "button",
+  type = "submit",   // ✅ MUST BE submit
   onClick,
   disabled,
   className = "",
-  variant = "primary", // primary | secondary | ghost
+  variant = "primary",
 }) {
   const base =
     "inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60";

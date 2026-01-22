@@ -1,39 +1,87 @@
-import { Link } from "react-router-dom";
-import Navbar from "../components/layout/Navbar";
-import Footer from "../components/layout/Footer";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
-export default function Home() {
+import Input from "../components/ui/Input";
+import Button from "../components/ui/Button";
+import { useAuth } from "../hooks/useAuth";
+
+export default function Login() {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      setError("");
+      setLoading(true);
+
+      await login(form);
+      navigate("/browse");
+    } catch (err) {
+      setError(err?.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
-      <Navbar />
+      <div className="mx-auto flex min-h-screen max-w-md items-center px-4">
+        <form
+          onSubmit={handleSubmit}
+          className="w-full rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl"
+        >
+          <h1 className="text-2xl font-bold">Sign In</h1>
+          <p className="mt-1 text-sm text-white/60">Login to continue</p>
 
-      <main className="pt-16">
-        <section className="mx-auto flex min-h-[80vh] max-w-7xl flex-col items-center justify-center px-4 text-center">
-          <h1 className="text-4xl font-extrabold md:text-6xl">
-            Unlimited movies, TV shows and more
-          </h1>
-          <p className="mt-4 max-w-2xl text-white/70">
-            Watch anywhere. Cancel anytime.
-          </p>
+          {error && (
+            <div className="mt-4 rounded-lg bg-red-500/10 p-3 text-sm text-red-400">
+              {error}
+            </div>
+          )}
 
-          <div className="mt-8 flex gap-3">
-            <Link
-              to="/register"
-              className="rounded-lg bg-red-600 px-6 py-3 text-sm font-semibold hover:bg-red-700"
-            >
-              Get Started
-            </Link>
-            <Link
-              to="/login"
-              className="rounded-lg bg-white px-6 py-3 text-sm font-semibold text-black hover:bg-white/90"
-            >
-              Sign In
-            </Link>
+          <div className="mt-5 space-y-4">
+            <Input
+              label="Email"
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="Enter email"
+              required
+            />
+
+            <Input
+              label="Password"
+              name="password"
+              type="password"
+              value={form.password}
+              onChange={handleChange}
+              placeholder="Enter password"
+              required
+            />
+
+            <Button type="submit" disabled={loading} className="w-full">
+              {loading ? "Signing in..." : "Sign In"}
+            </Button>
           </div>
-        </section>
-      </main>
 
-      <Footer />
+          <p className="mt-5 text-center text-sm text-white/60">
+            New here?{" "}
+            <Link to="/register" className="text-red-500 hover:underline">
+              Create account
+            </Link>
+          </p>
+        </form>
+      </div>
     </div>
   );
 }

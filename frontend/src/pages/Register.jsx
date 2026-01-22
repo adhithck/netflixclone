@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+
 import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
 import { useAuth } from "../hooks/useAuth";
@@ -79,7 +80,7 @@ export default function Register() {
               required
             />
 
-            <Button disabled={loading} className="w-full">
+            <Button type="submit" disabled={loading} className="w-full">
               {loading ? "Creating..." : "Create Account"}
             </Button>
           </div>
