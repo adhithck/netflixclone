@@ -1,0 +1,32 @@
+# dependencies
+node_modules/
+
+# env files
+.env
+.env.*
+
+# logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# build output
+dist/
+build/
+
+# vite cache
+.vite/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# editor / ide
+.vscode/
+.idea/
+
+# uploads (videos/images) - very important for your Method 2
+backend/uploads/
