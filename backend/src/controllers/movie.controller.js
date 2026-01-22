@@ -1,7 +1,7 @@
-const Movie = require("../models/Movie.model.js");
+import Movie from "../models/Movie.model.js";
 
 // ✅ Admin: Add movie metadata (manual method)
-exports.addMovie = async (req, res) => {
+export const addMovie = async (req, res) => {
   try {
     const {
       title,
@@ -41,7 +41,7 @@ exports.addMovie = async (req, res) => {
 };
 
 // ✅ Get all movies
-exports.getAllMovies = async (req, res) => {
+export const getAllMovies = async (req, res) => {
   try {
     const movies = await Movie.find().sort({ createdAt: -1 });
 
@@ -55,7 +55,7 @@ exports.getAllMovies = async (req, res) => {
 };
 
 // ✅ Get movie by id
-exports.getMovieById = async (req, res) => {
+export const getMovieById = async (req, res) => {
   try {
     const movie = await Movie.findById(req.params.id);
 
@@ -68,7 +68,7 @@ exports.getMovieById = async (req, res) => {
 };
 
 // ✅ Search movies
-exports.searchMovies = async (req, res) => {
+export const searchMovies = async (req, res) => {
   try {
     const q = req.query.q || "";
 

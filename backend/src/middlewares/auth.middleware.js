@@ -1,12 +1,15 @@
-const jwt = require("jsonwebtoken");
-const User = require("../models/User.model.js");
+import jwt from "jsonwebtoken";
+import User from "../models/User.model.js";
 
 const protect = async (req, res, next) => {
   try {
     let token;
 
     // token format: "Bearer xxxxx"
-    if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
       token = req.headers.authorization.split(" ")[1];
     }
 

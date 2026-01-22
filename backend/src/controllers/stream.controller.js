@@ -1,8 +1,8 @@
-const fs = require("fs");
-const path = require("path");
-const Movie = require("../models/Movie.model.js");
+import fs from "fs";
+import path from "path";
+import Movie from "../models/Movie.model.js";
 
-exports.streamMovie = async (req, res) => {
+export const streamMovie = async (req, res) => {
   try {
     const { movieId } = req.params;
 
@@ -10,7 +10,7 @@ exports.streamMovie = async (req, res) => {
     if (!movie) return res.status(404).json({ message: "Movie not found" });
 
     // movie.videoUrl = "uploads/videos/abc.mp4"
-    const videoPath = path.join(__dirname, "..", "..", movie.videoUrl);
+    const videoPath = path.join(process.cwd(), movie.videoUrl);
 
     if (!fs.existsSync(videoPath)) {
       return res.status(404).json({ message: "Video file not found" });

@@ -1,9 +1,9 @@
-const bcrypt = require("bcryptjs");
-const User = require("../models/User.model.js");
-const generateToken = require("../utils/generateToken.js");
+import bcrypt from "bcryptjs";
+import User from "../models/User.model.js";
+import generateToken from "../utils/generateToken.js";
 
 // ✅ Register
-exports.registerUser = async (req, res) => {
+export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
@@ -23,6 +23,7 @@ exports.registerUser = async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      isAdmin: false,
     });
 
     return res.status(201).json({
@@ -41,7 +42,7 @@ exports.registerUser = async (req, res) => {
 };
 
 // ✅ Login
-exports.loginUser = async (req, res) => {
+export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -76,8 +77,8 @@ exports.loginUser = async (req, res) => {
   }
 };
 
-// ✅ Get Profile (optional but useful)
-exports.getProfile = async (req, res) => {
+// ✅ Get Profile
+export const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select("-password");
     return res.status(200).json(user);
