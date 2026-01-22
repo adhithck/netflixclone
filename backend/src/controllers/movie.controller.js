@@ -1,4 +1,4 @@
-const Movie = require("../models/Movie.model");
+const Movie = require("../models/Movie.model.js");
 
 // ✅ Admin: Add movie metadata (manual method)
 exports.addMovie = async (req, res) => {

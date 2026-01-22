@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const Movie = require("../models/Movie.model");
+const Movie = require("../models/Movie.model.js");
 
 exports.streamMovie = async (req, res) => {
   try {
