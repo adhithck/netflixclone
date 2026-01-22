@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import Loader from "../components/ui/Loader";
-import { getMovieByIdApi } from "../api/movies.api";
-import { getThumbnailUrl } from "../api/movies.api";
+
+import { getMovieByIdApi, getThumbnailUrl } from "../api/movies.api.js";
 
 export default function Details() {
   const { id } = useParams();
@@ -27,6 +28,7 @@ export default function Details() {
         setLoading(false);
       }
     };
+
     load();
   }, [id]);
 
@@ -56,7 +58,7 @@ export default function Details() {
                 <h1 className="text-3xl font-bold">{movie.title}</h1>
                 <p className="mt-3 text-white/70">{movie.description}</p>
 
-                <div className="mt-4 text-sm text-white/60">
+                <div className="mt-4 text-sm text-white/60 space-y-1">
                   <p>Genre: {movie.genre || "Unknown"}</p>
                   <p>Year: {movie.year || "-"}</p>
                   <p>Duration: {movie.duration || "-"}</p>

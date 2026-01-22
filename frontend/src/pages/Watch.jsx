@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import Navbar from "../components/layout/Navbar";
-import { getMovieByIdApi, getStreamUrl } from "../api/movies.api";
+import { getMovieByIdApi, getStreamUrl } from "../api/movies.api.js";
 import Loader from "../components/ui/Loader";
 
 export default function Watch() {

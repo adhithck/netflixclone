@@ -1,12 +1,1 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Optional: hide scrollbar for Netflix rows */
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
+@import "tailwindcss";
