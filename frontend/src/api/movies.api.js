@@ -29,7 +29,10 @@ export const getStreamUrl = (movieId) => {
 // Thumbnail helper
 export const getThumbnailUrl = (thumbnailUrl) => {
   const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
-  return thumbnailUrl?.startsWith("http")
+
+  if (!thumbnailUrl) return "";
+
+  return thumbnailUrl.startsWith("http")
     ? thumbnailUrl
     : `${baseUrl}/${thumbnailUrl}`;
 };
@@ -38,12 +41,7 @@ export const getThumbnailUrl = (thumbnailUrl) => {
 
 // Upload movie
 export const uploadMovieApi = async (formData) => {
-  const res = await axiosInstance.post("/api/movies", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-
+  const res = await axiosInstance.post("/api/movies", formData);
   return res.data;
 };
 
@@ -53,8 +51,10 @@ export const deleteMovieApi = async (id) => {
   return res.data;
 };
 
-// Get all movies (admin)
+// Admin get movies
 export const adminGetMoviesApi = async () => {
   const res = await axiosInstance.get("/api/movies");
-  return res.data.movies; // ✅ return ARRAY directly
+
+  // backend returns { count, movies }
+  return res.data.movies || [];
 };

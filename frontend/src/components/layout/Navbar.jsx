@@ -7,20 +7,21 @@ export default function Navbar() {
 
   const { isLoggedIn, logout, user } = useAuth();
 
+  // Exact match only
   const isActive = (path) => location.pathname === path;
 
-  // ✅ Logout → go to Home
+  // Logout → Home
   const handleLogout = () => {
     logout();
     navigate("/");
+    window.scrollTo({ top: 0 });
   };
 
-  // ✅ Home click: scroll if already home, else navigate
-  const handleHome = () => {
+  // Home click (scroll if already home)
+  const handleHomeClick = (e) => {
     if (location.pathname === "/") {
+      e.preventDefault();
       window.scrollTo({ top: 0, behavior: "smooth" });
-    } else {
-      navigate("/");
     }
   };
 
@@ -30,24 +31,28 @@ export default function Navbar() {
 
         {/* LEFT */}
         <div className="flex items-center gap-6">
+
           {/* Logo */}
-          <button
-            onClick={handleHome}
+          <Link
+            to="/"
+            onClick={handleHomeClick}
             className="text-xl font-bold text-red-600"
           >
             NETFLIX
-          </button>
+          </Link>
 
-          {/* Desktop links */}
+          {/* Desktop Links */}
           <div className="hidden items-center gap-4 md:flex">
-            <button
-              onClick={handleHome}
+
+            <Link
+              to="/"
+              onClick={handleHomeClick}
               className={`text-sm ${
                 isActive("/") ? "text-white" : "text-white/70"
               } hover:text-white`}
             >
               Home
-            </button>
+            </Link>
 
             {isLoggedIn && (
               <>
@@ -60,7 +65,6 @@ export default function Navbar() {
                   Browse
                 </Link>
 
-                {/* Admin */}
                 {user?.isAdmin && (
                   <Link
                     to="/admin"

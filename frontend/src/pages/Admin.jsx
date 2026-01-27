@@ -21,22 +21,21 @@ export default function Admin() {
 
   const [video, setVideo] = useState(null);
   const [thumbnail, setThumbnail] = useState(null);
-
   const [thumbPreview, setThumbPreview] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
   // ================= LOAD MOVIES =================
- const loadMovies = async () => {
-  try {
-    const movies = await adminGetMoviesApi();
-    setMovies(movies || []);
-  } catch (err) {
-    console.log(err);
-    setMovies([]);
-  }
-};
-
+  const loadMovies = async () => {
+    try {
+      const list = await adminGetMoviesApi();
+      setMovies(list || []);
+    } catch (err) {
+      console.error(err);
+      setMovies([]);
+    }
+  };
 
   useEffect(() => {
     loadMovies();
@@ -47,15 +46,21 @@ export default function Admin() {
     e.preventDefault();
 
     if (!form.title || !video || !thumbnail) {
-      alert("Title, video & thumbnail required");
+      alert("Title, video and thumbnail required");
       return;
     }
 
     try {
       setLoading(true);
+      setMessage("");
 
       const fd = new FormData();
-      Object.entries(form).forEach(([k, v]) => fd.append(k, v));
+
+      fd.append("title", form.title);
+      fd.append("description", form.description);
+      fd.append("genre", form.genre);
+      fd.append("year", form.year);
+      fd.append("duration", form.duration);
       fd.append("video", video);
       fd.append("thumbnail", thumbnail);
 
@@ -75,7 +80,7 @@ export default function Admin() {
       setThumbnail(null);
       setThumbPreview("");
 
-      loadMovies();
+      await loadMovies();
     } catch (err) {
       alert(err?.response?.data?.message || "Upload failed");
     } finally {
@@ -85,7 +90,8 @@ export default function Admin() {
 
   // ================= DELETE =================
   const deleteMovie = async (id) => {
-    if (!confirm("Delete this movie?")) return;
+    if (!window.confirm("Delete this movie?")) return;
+
     await deleteMovieApi(id);
     loadMovies();
   };
@@ -96,10 +102,9 @@ export default function Admin() {
 
       <div className="mx-auto max-w-7xl px-6 pt-24 pb-20">
 
-        {/* Header */}
         <h1 className="mb-6 text-3xl font-bold">🎬 Admin Panel</h1>
 
-        {/* ================= UPLOAD CARD ================= */}
+        {/* ================= UPLOAD ================= */}
         <form
           onSubmit={submit}
           className="mb-12 grid gap-4 rounded-2xl border border-white/10 bg-white/5 p-6 md:grid-cols-2"
@@ -142,14 +147,15 @@ export default function Admin() {
             }
           />
 
-          {/* Upload */}
+          {/* FILES */}
           <div className="col-span-2 flex flex-wrap gap-4">
             <input
               type="file"
               accept="image/*"
               onChange={(e) => {
-                setThumbnail(e.target.files[0]);
-                setThumbPreview(URL.createObjectURL(e.target.files[0]));
+                const file = e.target.files[0];
+                setThumbnail(file);
+                setThumbPreview(URL.createObjectURL(file));
               }}
             />
 
@@ -164,10 +170,14 @@ export default function Admin() {
             <img
               src={thumbPreview}
               className="col-span-2 h-48 rounded object-cover"
+              alt=""
             />
           )}
 
-          <button className="col-span-2 rounded-lg bg-red-600 py-3 font-semibold hover:bg-red-700">
+          <button
+            disabled={loading}
+            className="col-span-2 rounded-lg bg-red-600 py-3 font-semibold hover:bg-red-700 disabled:opacity-60"
+          >
             {loading ? "Uploading..." : "Upload Movie"}
           </button>
 
@@ -185,13 +195,11 @@ export default function Admin() {
 
         <div className="grid gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {movies.map((m) => (
-            <div
-              key={m._id}
-              className="group relative overflow-hidden rounded-xl"
-            >
+            <div key={m._id} className="group relative overflow-hidden rounded-xl">
               <img
                 src={getThumbnailUrl(m.thumbnailUrl)}
                 className="h-64 w-full object-cover transition group-hover:scale-105"
+                alt=""
               />
 
               <div className="absolute inset-0 bg-black/60 opacity-0 transition group-hover:opacity-100" />
