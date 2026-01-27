@@ -13,9 +13,9 @@ export default function Home() {
           {/* Background */}
           <div className="absolute inset-0 pointer-events-none">
             <img
-              src="https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?q=80&w=1600&auto=format&fit=crop"
+              src="/netflix-bg.png"
               className="h-full w-full object-cover opacity-50"
-              alt=""
+              alt="Netflix Background"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/20" />
           </div>
