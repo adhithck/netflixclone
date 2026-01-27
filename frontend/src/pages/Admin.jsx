@@ -97,7 +97,7 @@ export default function Admin() {
       <div className="mx-auto max-w-7xl px-6 pt-24 pb-20">
 
         {/* Header */}
-        <h1 className="mb-6 text-3xl font-bold">🎬 Admin Studio</h1>
+        <h1 className="mb-6 text-3xl font-bold">🎬 Admin Panel</h1>
 
         {/* ================= UPLOAD CARD ================= */}
         <form
