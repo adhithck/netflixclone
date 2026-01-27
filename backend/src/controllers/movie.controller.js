@@ -1,6 +1,6 @@
 import Movie from "../models/Movie.model.js";
 
-// ✅ Admin: Add movie metadata (manual method)
+// ✅ Admin: Add movie
 export const addMovie = async (req, res) => {
   try {
     const {
@@ -27,16 +27,16 @@ export const addMovie = async (req, res) => {
       year,
       duration,
       isPremium: isPremium || false,
-      videoUrl, // ✅ local path (uploads/videos/xxx.mp4)
-      thumbnailUrl, // ✅ local path (uploads/thumbnails/xxx.jpg)
+      videoUrl,
+      thumbnailUrl,
     });
 
-    return res.status(201).json({
+    res.status(201).json({
       message: "Movie added ✅",
       movie,
     });
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -45,12 +45,12 @@ export const getAllMovies = async (req, res) => {
   try {
     const movies = await Movie.find().sort({ createdAt: -1 });
 
-    return res.status(200).json({
+    res.json({
       count: movies.length,
       movies,
     });
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -61,9 +61,9 @@ export const getMovieById = async (req, res) => {
 
     if (!movie) return res.status(404).json({ message: "Movie not found" });
 
-    return res.status(200).json(movie);
+    res.json(movie);
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -74,13 +74,47 @@ export const searchMovies = async (req, res) => {
 
     const movies = await Movie.find({
       title: { $regex: q, $options: "i" },
-    }).limit(20);
+    });
 
-    return res.status(200).json({
+    res.json({
       count: movies.length,
       movies,
     });
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ✅ Admin: Update movie
+export const updateMovie = async (req, res) => {
+  try {
+    const movie = await Movie.findById(req.params.id);
+
+    if (!movie) return res.status(404).json({ message: "Movie not found" });
+
+    Object.assign(movie, req.body);
+    await movie.save();
+
+    res.json({
+      message: "Movie updated ✅",
+      movie,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ✅ Admin: Delete movie
+export const deleteMovie = async (req, res) => {
+  try {
+    const movie = await Movie.findById(req.params.id);
+
+    if (!movie) return res.status(404).json({ message: "Movie not found" });
+
+    await movie.deleteOne();
+
+    res.json({ message: "Movie deleted ✅" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
