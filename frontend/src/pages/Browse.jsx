@@ -33,45 +33,56 @@ export default function Browse() {
     <div className="min-h-screen bg-black text-white">
       <Navbar />
 
-      <main className="pt-16">
+      <main className="pt-20">
         {loading && <Loader text="Loading movies..." />}
 
         {error && (
-          <div className="mx-auto max-w-6xl px-4 py-6 text-red-400">
+          <div className="mx-auto max-w-7xl px-6 py-6 text-red-400">
             {error}
           </div>
         )}
 
         {!loading && !error && movies.length === 0 && (
-          <div className="mx-auto max-w-6xl px-4 py-10 text-white/70">
-            No movies found. Upload movies from Postman first.
+          <div className="mx-auto max-w-7xl px-6 py-10 text-white/60">
+            No movies uploaded yet.
           </div>
         )}
 
         {!loading && movies.length > 0 && (
-          <div className="mx-auto max-w-6xl px-4 py-8">
-            <h1 className="mb-6 text-2xl font-bold">Browse Movies</h1>
+          <div className="mx-auto max-w-7xl px-4 pb-16">
+            {/* Netflix style row */}
+            <div className="mb-4 px-2 text-lg font-semibold">
+              Trending Now
+            </div>
 
-            <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            <div
+              className="
+                grid gap-4
+                grid-cols-2
+                sm:grid-cols-3
+                md:grid-cols-4
+                lg:grid-cols-5
+              "
+            >
               {movies.map((movie) => (
                 <Link
                   key={movie._id}
                   to={`/details/${movie._id}`}
-                  className="group overflow-hidden rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition"
+                  className="group relative overflow-hidden rounded-lg"
                 >
+                  {/* Thumbnail */}
                   <img
                     src={getThumbnailUrl(movie.thumbnailUrl)}
                     alt={movie.title}
-                    className="h-64 w-full object-cover transition group-hover:scale-105"
+                    className="aspect-[2/3] w-full object-cover transition duration-300 group-hover:scale-110"
                   />
 
-                  <div className="p-4">
-                    <h2 className="font-semibold line-clamp-1">
-                      {movie.title}
-                    </h2>
-                    <p className="mt-1 text-sm text-white/60">
-                      {movie.genre || "Unknown"} • {movie.year || "-"}
-                    </p>
+                  {/* Overlay */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition" />
+
+                  {/* Title on hover */}
+                  <div className="absolute bottom-0 w-full translate-y-full p-3 text-sm font-semibold transition group-hover:translate-y-0">
+                    {movie.title}
                   </div>
                 </Link>
               ))}

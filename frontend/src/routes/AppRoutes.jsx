@@ -10,49 +10,71 @@ import Admin from "../pages/Admin";
 
 import { useAuth } from "../hooks/useAuth";
 
-// Normal Protected
+// ================= USER PROTECTED =================
 function PrivateRoute({ children }) {
   const { isLoggedIn, loading } = useAuth();
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        Loading...
-      </div>
-    );
-  }
+  if (loading) return <div className="text-white">Loading...</div>;
 
-  return isLoggedIn ? children : <Navigate to="/login" replace />;
+  return isLoggedIn ? children : <Navigate to="/" replace />;
 }
 
-// Admin Protected
-function AdminRoute({ children }) {
-  const { user, loading } = useAuth();
+// ================= PUBLIC ONLY =================
+function PublicRoute({ children }) {
+  const { isLoggedIn, user } = useAuth();
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        Loading...
-      </div>
-    );
-  }
-
-  if (!user || !user.isAdmin) {
+  if (isLoggedIn) {
+    if (user?.isAdmin) return <Navigate to="/admin" replace />;
     return <Navigate to="/browse" replace />;
   }
 
   return children;
 }
 
+// ================= ADMIN ONLY =================
+function AdminRoute({ children }) {
+  const { user, loading } = useAuth();
+
+  if (loading) return <div className="text-white">Loading...</div>;
+
+  if (!user || !user.isAdmin) return <Navigate to="/" replace />;
+
+  return children;
+}
+
+// ================= ROUTES =================
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* Public */}
-      <Route path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      {/* PUBLIC */}
+      <Route
+        path="/"
+        element={
+          <PublicRoute>
+            <Home />
+          </PublicRoute>
+        }
+      />
 
-      {/* User */}
+      <Route
+        path="/login"
+        element={
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        }
+      />
+
+      <Route
+        path="/register"
+        element={
+          <PublicRoute>
+            <Register />
+          </PublicRoute>
+        }
+      />
+
+      {/* USER */}
       <Route
         path="/browse"
         element={
@@ -80,7 +102,7 @@ export default function AppRoutes() {
         }
       />
 
-      {/* Admin */}
+      {/* ADMIN */}
       <Route
         path="/admin"
         element={
@@ -90,7 +112,7 @@ export default function AppRoutes() {
         }
       />
 
-      {/* 404 */}
+      {/* FALLBACK */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

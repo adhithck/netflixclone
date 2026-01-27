@@ -8,11 +8,11 @@ export default function Navbar() {
   const { isLoggedIn, logout, user } = useAuth();
 
   const isActive = (path) => location.pathname === path;
-
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
+  
+const handleLogout = () => {
+  logout();
+  navigate("/");
+};
 
   return (
     <nav className="fixed top-0 left-0 z-50 w-full border-b border-white/10 bg-black/60 backdrop-blur">
