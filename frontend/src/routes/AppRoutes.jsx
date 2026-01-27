@@ -6,10 +6,11 @@ import Register from "../pages/Register";
 import Browse from "../pages/Browse";
 import Details from "../pages/Details";
 import Watch from "../pages/Watch";
+import Admin from "../pages/Admin";
 
 import { useAuth } from "../hooks/useAuth";
 
-// ✅ Protected Route Wrapper
+// Normal Protected
 function PrivateRoute({ children }) {
   const { isLoggedIn, loading } = useAuth();
 
@@ -24,6 +25,25 @@ function PrivateRoute({ children }) {
   return isLoggedIn ? children : <Navigate to="/login" replace />;
 }
 
+// Admin Protected
+function AdminRoute({ children }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
+
+  if (!user || !user.isAdmin) {
+    return <Navigate to="/browse" replace />;
+  }
+
+  return children;
+}
+
 export default function AppRoutes() {
   return (
     <Routes>
@@ -32,7 +52,7 @@ export default function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* Protected */}
+      {/* User */}
       <Route
         path="/browse"
         element={
@@ -57,6 +77,16 @@ export default function AppRoutes() {
           <PrivateRoute>
             <Watch />
           </PrivateRoute>
+        }
+      />
+
+      {/* Admin */}
+      <Route
+        path="/admin"
+        element={
+          <AdminRoute>
+            <Admin />
+          </AdminRoute>
         }
       />
 

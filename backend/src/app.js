@@ -5,7 +5,6 @@ import path from "path";
 import authRoutes from "./routes/auth.routes.js";
 import movieRoutes from "./routes/movie.routes.js";
 import streamRoutes from "./routes/stream.routes.js";
-import uploadRoutes from "./routes/upload.routes.js";
 
 import notFound from "./middlewares/notFound.middleware.js";
 import errorHandler from "./middlewares/error.middleware.js";
@@ -16,33 +15,25 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ Serve uploaded files (thumbnails + videos if needed)
+// ✅ Serve uploaded files
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
-// ✅ Root Route
+// Root
 app.get("/", (req, res) => {
-  res.json({
-    message: "Netflix Clone Backend Running ✅",
-    status: "OK",
-  });
+  res.json({ message: "Netflix Clone Backend Running ✅" });
 });
 
-// ✅ Health check route
+// Health
 app.get("/api/health", (req, res) => {
-  res.json({
-    status: "OK ✅",
-    message: "Server is healthy",
-    time: new Date().toISOString(),
-  });
+  res.json({ status: "OK" });
 });
 
-// ✅ API routes
+// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/movies", movieRoutes);
 app.use("/api/stream", streamRoutes);
-app.use("/api/upload", uploadRoutes);
 
-// Error handlers
+// Errors
 app.use(notFound);
 app.use(errorHandler);
 

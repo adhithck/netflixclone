@@ -5,25 +5,30 @@ export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { isLoggedIn, logout } = useAuth(); // ✅ use context, not localStorage
+  const { isLoggedIn, logout, user } = useAuth();
 
-  const isHomePage = location.pathname === "/";
   const isActive = (path) => location.pathname === path;
 
   const handleLogout = () => {
-    logout();         // ✅ clears token safely
+    logout();
     navigate("/login");
   };
 
   return (
     <nav className="fixed top-0 left-0 z-50 w-full border-b border-white/10 bg-black/60 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
-        {/* Left */}
+
+        {/* LEFT */}
         <div className="flex items-center gap-6">
-          <Link to="/" className="text-xl font-bold text-red-600">
+          {/* Logo */}
+          <Link
+            to={isLoggedIn ? "/browse" : "/"}
+            className="text-xl font-bold text-red-600"
+          >
             NETFLIX
           </Link>
 
+          {/* Desktop Links */}
           <div className="hidden items-center gap-4 md:flex">
             <Link
               to="/"
@@ -35,19 +40,33 @@ export default function Navbar() {
             </Link>
 
             {isLoggedIn && (
-              <Link
-                to="/browse"
-                className={`text-sm ${
-                  isActive("/browse") ? "text-white" : "text-white/70"
-                } hover:text-white`}
-              >
-                Browse
-              </Link>
+              <>
+                <Link
+                  to="/browse"
+                  className={`text-sm ${
+                    isActive("/browse") ? "text-white" : "text-white/70"
+                  } hover:text-white`}
+                >
+                  Browse
+                </Link>
+
+                {/* Admin only */}
+                {user?.isAdmin && (
+                  <Link
+                    to="/admin"
+                    className={`text-sm ${
+                      isActive("/admin") ? "text-white" : "text-white/70"
+                    } hover:text-white`}
+                  >
+                    Admin
+                  </Link>
+                )}
+              </>
             )}
           </div>
         </div>
 
-        {/* Right */}
+        {/* RIGHT */}
         <div className="flex items-center gap-3">
           {!isLoggedIn ? (
             <>
@@ -57,6 +76,7 @@ export default function Navbar() {
               >
                 Sign In
               </Link>
+
               <Link
                 to="/register"
                 className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
@@ -65,19 +85,15 @@ export default function Navbar() {
               </Link>
             </>
           ) : (
-            <>
-              {/* ✅ keep logout hidden only in home page */}
-              {!isHomePage && (
-                <button
-                  onClick={handleLogout}
-                  className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-                >
-                  Logout
-                </button>
-              )}
-            </>
+            <button
+              onClick={handleLogout}
+              className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+            >
+              Logout
+            </button>
           )}
         </div>
+
       </div>
     </nav>
   );

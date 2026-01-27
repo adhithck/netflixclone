@@ -1,22 +1,17 @@
 import Movie from "../models/Movie.model.js";
 
-// ✅ Admin: Add movie
+// ================= ADD MOVIE (UPLOAD) =================
 export const addMovie = async (req, res) => {
   try {
-    const {
-      title,
-      description,
-      genre,
-      year,
-      duration,
-      isPremium,
-      videoUrl,
-      thumbnailUrl,
-    } = req.body;
+    const { title, description, genre, year, duration, isPremium } = req.body;
 
-    if (!title || !videoUrl || !thumbnailUrl) {
+    // files from multer
+    const video = req.files?.video?.[0];
+    const thumbnail = req.files?.thumbnail?.[0];
+
+    if (!title || !video || !thumbnail) {
       return res.status(400).json({
-        message: "title, videoUrl, thumbnailUrl are required",
+        message: "Title, video and thumbnail required",
       });
     }
 
@@ -27,20 +22,22 @@ export const addMovie = async (req, res) => {
       year,
       duration,
       isPremium: isPremium || false,
-      videoUrl,
-      thumbnailUrl,
+
+      videoUrl: `uploads/videos/${video.filename}`,
+      thumbnailUrl: `uploads/thumbnails/${thumbnail.filename}`,
     });
 
     res.status(201).json({
-      message: "Movie added ✅",
+      message: "Movie uploaded ✅",
       movie,
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: error.message });
   }
 };
 
-// ✅ Get all movies
+// ================= GET ALL =================
 export const getAllMovies = async (req, res) => {
   try {
     const movies = await Movie.find().sort({ createdAt: -1 });
@@ -54,7 +51,7 @@ export const getAllMovies = async (req, res) => {
   }
 };
 
-// ✅ Get movie by id
+// ================= GET ONE =================
 export const getMovieById = async (req, res) => {
   try {
     const movie = await Movie.findById(req.params.id);
@@ -67,7 +64,7 @@ export const getMovieById = async (req, res) => {
   }
 };
 
-// ✅ Search movies
+// ================= SEARCH =================
 export const searchMovies = async (req, res) => {
   try {
     const q = req.query.q || "";
@@ -85,7 +82,7 @@ export const searchMovies = async (req, res) => {
   }
 };
 
-// ✅ Admin: Update movie
+// ================= UPDATE =================
 export const updateMovie = async (req, res) => {
   try {
     const movie = await Movie.findById(req.params.id);
@@ -104,7 +101,7 @@ export const updateMovie = async (req, res) => {
   }
 };
 
-// ✅ Admin: Delete movie
+// ================= DELETE =================
 export const deleteMovie = async (req, res) => {
   try {
     const movie = await Movie.findById(req.params.id);
