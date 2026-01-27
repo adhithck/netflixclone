@@ -3,39 +3,41 @@ import Movie from "../models/Movie.model.js";
 // ================= ADD MOVIE (UPLOAD) =================
 export const addMovie = async (req, res) => {
   try {
-    const { title, description, genre, year, duration, isPremium } = req.body;
+    const { titles, descriptions, genres, years, durations } = req.body;
 
-    // files from multer
-    const video = req.files?.video?.[0];
-    const thumbnail = req.files?.thumbnail?.[0];
+    const videos = req.files?.videos || [];
+    const thumbs = req.files?.thumbnails || [];
 
-    if (!title || !video || !thumbnail) {
-      return res.status(400).json({
-        message: "Title, video and thumbnail required",
+    if (!videos.length || !thumbs.length) {
+      return res.status(400).json({ message: "Files required" });
+    }
+
+    const movies = [];
+
+    for (let i = 0; i < videos.length; i++) {
+      movies.push({
+        title: Array.isArray(titles) ? titles[i] : titles,
+        description: descriptions?.[i] || "",
+        genre: genres?.[i] || "Unknown",
+        year: years?.[i] || new Date().getFullYear(),
+        duration: durations?.[i] || "0 min",
+
+        videoUrl: `uploads/videos/${videos[i].filename}`,
+        thumbnailUrl: `uploads/thumbnails/${thumbs[i].filename}`,
       });
     }
 
-    const movie = await Movie.create({
-      title,
-      description,
-      genre,
-      year,
-      duration,
-      isPremium: isPremium || false,
-
-      videoUrl: `uploads/videos/${video.filename}`,
-      thumbnailUrl: `uploads/thumbnails/${thumbnail.filename}`,
-    });
+    const created = await Movie.insertMany(movies);
 
     res.status(201).json({
-      message: "Movie uploaded ✅",
-      movie,
+      message: `${created.length} movies uploaded ✅`,
+      movies: created,
     });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: error.message });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
+
 
 // ================= GET ALL =================
 export const getAllMovies = async (req, res) => {

@@ -25,8 +25,8 @@ router.post(
   protect,
   adminOnly,
   upload.fields([
-    { name: "video", maxCount: 1 },
-    { name: "thumbnail", maxCount: 1 },
+    { name: "video", maxCount: 20 },
+    { name: "thumbnail", maxCount: 20 },
   ]),
   addMovie
 );

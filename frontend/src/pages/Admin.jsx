@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/layout/Navbar";
+
 import {
   uploadMovieApi,
   deleteMovieApi,
@@ -25,21 +26,28 @@ export default function Admin() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  // ================= LOAD =================
-  const loadMovies = async () => {
-    const data = await adminGetMoviesApi();
-    setMovies(data);
-  };
+  // ================= LOAD MOVIES =================
+ const loadMovies = async () => {
+  try {
+    const movies = await adminGetMoviesApi();
+    setMovies(movies || []);
+  } catch (err) {
+    console.log(err);
+    setMovies([]);
+  }
+};
+
 
   useEffect(() => {
     loadMovies();
   }, []);
 
+  // ================= UPLOAD =================
   const submit = async (e) => {
     e.preventDefault();
 
     if (!form.title || !video || !thumbnail) {
-      alert("Fill required fields");
+      alert("Title, video & thumbnail required");
       return;
     }
 
@@ -53,7 +61,7 @@ export default function Admin() {
 
       await uploadMovieApi(fd);
 
-      setMessage("Movie uploaded ✅");
+      setMessage("Movie uploaded successfully ✅");
 
       setForm({
         title: "",
@@ -68,13 +76,16 @@ export default function Admin() {
       setThumbPreview("");
 
       loadMovies();
+    } catch (err) {
+      alert(err?.response?.data?.message || "Upload failed");
     } finally {
       setLoading(false);
     }
   };
 
+  // ================= DELETE =================
   const deleteMovie = async (id) => {
-    if (!confirm("Delete movie?")) return;
+    if (!confirm("Delete this movie?")) return;
     await deleteMovieApi(id);
     loadMovies();
   };
@@ -83,13 +94,12 @@ export default function Admin() {
     <div className="min-h-screen bg-[#0b0b0b] text-white">
       <Navbar />
 
-      <div className="mx-auto max-w-7xl px-6 pt-24 pb-10">
-        {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
-          <h1 className="text-3xl font-bold">🎬 Admin Studio</h1>
-        </div>
+      <div className="mx-auto max-w-7xl px-6 pt-24 pb-20">
 
-        {/* Upload Card */}
+        {/* Header */}
+        <h1 className="mb-6 text-3xl font-bold">🎬 Admin Studio</h1>
+
+        {/* ================= UPLOAD CARD ================= */}
         <form
           onSubmit={submit}
           className="mb-12 grid gap-4 rounded-2xl border border-white/10 bg-white/5 p-6 md:grid-cols-2"
@@ -110,13 +120,14 @@ export default function Admin() {
 
           <input
             placeholder="Year"
+            type="number"
             className="rounded bg-black p-3"
             value={form.year}
             onChange={(e) => setForm({ ...form, year: e.target.value })}
           />
 
           <input
-            placeholder="Duration"
+            placeholder="Duration (eg: 2h 10m)"
             className="rounded bg-black p-3"
             value={form.duration}
             onChange={(e) => setForm({ ...form, duration: e.target.value })}
@@ -132,7 +143,7 @@ export default function Admin() {
           />
 
           {/* Upload */}
-          <div className="col-span-2 flex gap-4">
+          <div className="col-span-2 flex flex-wrap gap-4">
             <input
               type="file"
               accept="image/*"
@@ -165,10 +176,14 @@ export default function Admin() {
           )}
         </form>
 
-        {/* Movies Grid */}
+        {/* ================= MOVIES ================= */}
         <h2 className="mb-4 text-xl font-bold">Movies</h2>
 
-        <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-4">
+        {movies.length === 0 && (
+          <p className="text-white/50">No movies uploaded yet.</p>
+        )}
+
+        <div className="grid gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {movies.map((m) => (
             <div
               key={m._id}
@@ -186,7 +201,7 @@ export default function Admin() {
 
                 <button
                   onClick={() => deleteMovie(m._id)}
-                  className="mt-2 w-full rounded bg-red-600 py-1 text-sm"
+                  className="mt-2 w-full rounded bg-red-600 py-1 text-sm hover:bg-red-700"
                 >
                   Delete
                 </button>
@@ -194,6 +209,7 @@ export default function Admin() {
             </div>
           ))}
         </div>
+
       </div>
     </div>
   );

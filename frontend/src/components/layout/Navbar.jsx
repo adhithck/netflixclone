@@ -8,36 +8,46 @@ export default function Navbar() {
   const { isLoggedIn, logout, user } = useAuth();
 
   const isActive = (path) => location.pathname === path;
-  
-const handleLogout = () => {
-  logout();
-  navigate("/");
-};
+
+  // ✅ Logout → go to Home
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
+  // ✅ Home click: scroll if already home, else navigate
+  const handleHome = () => {
+    if (location.pathname === "/") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      navigate("/");
+    }
+  };
 
   return (
-    <nav className="fixed top-0 left-0 z-50 w-full border-b border-white/10 bg-black/60 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
+    <nav className="fixed top-0 left-0 z-50 w-full border-b border-white/10 bg-black/70 backdrop-blur">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
 
         {/* LEFT */}
         <div className="flex items-center gap-6">
           {/* Logo */}
-          <Link
-            to={isLoggedIn ? "/browse" : "/"}
+          <button
+            onClick={handleHome}
             className="text-xl font-bold text-red-600"
           >
             NETFLIX
-          </Link>
+          </button>
 
-          {/* Desktop Links */}
+          {/* Desktop links */}
           <div className="hidden items-center gap-4 md:flex">
-            <Link
-              to="/"
+            <button
+              onClick={handleHome}
               className={`text-sm ${
                 isActive("/") ? "text-white" : "text-white/70"
               } hover:text-white`}
             >
               Home
-            </Link>
+            </button>
 
             {isLoggedIn && (
               <>
@@ -50,7 +60,7 @@ const handleLogout = () => {
                   Browse
                 </Link>
 
-                {/* Admin only */}
+                {/* Admin */}
                 {user?.isAdmin && (
                   <Link
                     to="/admin"
@@ -93,7 +103,6 @@ const handleLogout = () => {
             </button>
           )}
         </div>
-
       </div>
     </nav>
   );

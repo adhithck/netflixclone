@@ -1,5 +1,7 @@
 import axiosInstance from "./axios";
 
+// ================= USER =================
+
 // Get all movies
 export const getAllMoviesApi = async () => {
   const res = await axiosInstance.get("/api/movies");
@@ -12,7 +14,7 @@ export const getMovieByIdApi = async (id) => {
   return res.data;
 };
 
-// Search
+// Search movies
 export const searchMoviesApi = async (query) => {
   const res = await axiosInstance.get(`/api/movies/search?q=${query}`);
   return res.data;
@@ -32,22 +34,27 @@ export const getThumbnailUrl = (thumbnailUrl) => {
     : `${baseUrl}/${thumbnailUrl}`;
 };
 
-// ✅ ADMIN UPLOAD
+// ================= ADMIN =================
+
+// Upload movie
 export const uploadMovieApi = async (formData) => {
   const res = await axiosInstance.post("/api/movies", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
   });
 
   return res.data;
 };
-// ✅ Admin delete movie
+
+// Delete movie
 export const deleteMovieApi = async (id) => {
   const res = await axiosInstance.delete(`/api/movies/${id}`);
   return res.data;
 };
 
-// ✅ Admin: get all movies
+// Get all movies (admin)
 export const adminGetMoviesApi = async () => {
   const res = await axiosInstance.get("/api/movies");
-  return res.data.movies;
+  return res.data.movies; // ✅ return ARRAY directly
 };
