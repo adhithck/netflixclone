@@ -11,23 +11,22 @@ import {
   getStreamUrl,
 } from "../api/movies.api";
 
-const FILTERS = ["All", "Trending", "Action", "Horror", "Drama", "SciFi", "Comedy"];
-
 export default function Browse() {
   const heroRef = useRef(null);
 
   const [movies, setMovies] = useState([]);
-  const [filtered, setFiltered] = useState([]);
   const [continueWatching, setContinueWatching] = useState([]);
   const [hero, setHero] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
-  const [active, setActive] = useState("All");
   const [fade, setFade] = useState(false);
+  const isSearching = query.trim().length > 0;
+
 
   // ================= LOAD =================
   useEffect(() => {
+    window.scrollTo(0, 0);
     loadMovies();
     loadContinue();
   }, []);
@@ -35,13 +34,17 @@ export default function Browse() {
   const loadMovies = async () => {
     setLoading(true);
     const data = await getAllMoviesApi();
-    setMovies(data.movies || []);
-    setFiltered(data.movies || []);
-    setHero(data.movies?.[0]);
+    const list = data.movies || [];
+
+    setMovies(list);
+
+    const last = localStorage.getItem("lastWatched");
+    setHero(last ? JSON.parse(last) : list[0]);
+
     setLoading(false);
   };
 
-  // ================= CONTINUE =================
+  // ================= CONTINUE WATCHING =================
   const loadContinue = () => {
     const keys = Object.keys(localStorage).filter((k) =>
       k.startsWith("progress-")
@@ -53,29 +56,26 @@ export default function Browse() {
       .map((x) => x.movie);
 
     setContinueWatching(list);
-
-    const last = localStorage.getItem("lastWatched");
-    if (last) setHero(JSON.parse(last));
   };
 
-  // ================= AUTO HERO SWITCH =================
+  // ================= HERO AUTO SWITCH =================
   useEffect(() => {
-    if (!filtered.length) return;
+    if (!movies.length) return;
 
     const timer = setInterval(() => {
       setFade(true);
 
       setTimeout(() => {
         setHero((h) => {
-          const idx = filtered.findIndex((m) => m._id === h?._id);
-          return filtered[(idx + 1) % filtered.length];
+          const idx = movies.findIndex((m) => m._id === h?._id);
+          return movies[(idx + 1) % movies.length];
         });
         setFade(false);
       }, 400);
     }, 10000);
 
     return () => clearInterval(timer);
-  }, [filtered]);
+  }, [movies]);
 
   // ================= PAUSE HERO ON SCROLL =================
   useEffect(() => {
@@ -92,28 +92,17 @@ export default function Browse() {
 
   // ================= SEARCH =================
   const handleSearch = async (e) => {
-    const v = e.target.value;
-    setQuery(v);
+  const v = e.target.value;
+  setQuery(v);
 
-    if (!v) return applyFilter(active, movies);
+  if (!v.trim()) {
+    loadMovies();
+    return;
+  }
 
-    const data = await searchMoviesApi(v);
-    setFiltered(data.movies || []);
-  };
-
-  // ================= FILTER =================
-  const applyFilter = (type, list = movies) => {
-    setActive(type);
-
-    if (type === "All") return setFiltered(list);
-    if (type === "Trending") return setFiltered([...list].slice(0, 10));
-
-    setFiltered(
-      list.filter((m) =>
-        m.genre?.toLowerCase().includes(type.toLowerCase())
-      )
-    );
-  };
+  const data = await searchMoviesApi(v);
+  setMovies(data.movies || []);
+};
 
   if (loading) return <Loader text="Loading Netflix..." />;
 
@@ -122,8 +111,7 @@ export default function Browse() {
       <Navbar />
 
       <main className="pt-16">
-
-        {/* SEARCH + FILTER TOP */}
+        {/* SEARCH */}
         <div className="mx-auto max-w-7xl px-4 pt-4">
           <input
             value={query}
@@ -131,24 +119,11 @@ export default function Browse() {
             placeholder="Search movies..."
             className="w-full rounded bg-white/10 px-4 py-3 outline-none"
           />
-
-          <div className="mt-3 flex gap-3 overflow-x-auto">
-            {FILTERS.map((f) => (
-              <button
-                key={f}
-                onClick={() => applyFilter(f)}
-                className={`rounded-full px-4 py-2 text-sm ${
-                  active === f ? "bg-red-600" : "bg-white/10"
-                }`}
-              >
-                {f}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* HERO */}
-        {hero && (
+        {hero && !isSearching && (
+
           <div
             className={`relative h-[65vh] transition-opacity duration-500 ${
               fade ? "opacity-0" : "opacity-100"
@@ -178,24 +153,95 @@ export default function Browse() {
           </div>
         )}
 
+        {/* ROWS */}
         <Section title="Continue Watching" list={continueWatching} progress />
-        <Section title={active} list={filtered} />
 
+       {!isSearching ? (
+  <>
+   {!isSearching ? (
+  <>
+    <Section title="Trending" list={movies.slice(0, 10)} />
+
+    <Section
+      title="Action"
+      list={movies.filter((m) =>
+        m.genre?.toLowerCase().includes("action")
+      )}
+    />
+
+    <Section
+      title="Horror"
+      list={movies.filter((m) =>
+        m.genre?.toLowerCase().includes("horror")
+      )}
+    />
+
+    <Section
+      title="Drama"
+      list={movies.filter((m) =>
+        m.genre?.toLowerCase().includes("drama")
+      )}
+    />
+
+    <Section
+      title="SciFi"
+      list={movies.filter((m) =>
+        m.genre?.toLowerCase().includes("scifi")
+      )}
+    />
+  </>
+) : (
+  <Section title="Search Results" list={movies} />
+)}
+
+    <Section
+      title="Action"
+      list={movies.filter((m) =>
+        m.genre?.toLowerCase().includes("action")
+      )}
+    />
+
+    <Section
+      title="Horror"
+      list={movies.filter((m) =>
+        m.genre?.toLowerCase().includes("horror")
+      )}
+    />
+
+    <Section
+      title="Drama"
+      list={movies.filter((m) =>
+        m.genre?.toLowerCase().includes("drama")
+      )}
+    />
+
+    <Section
+      title="SciFi"
+      list={movies.filter((m) =>
+        m.genre?.toLowerCase().includes("scifi")
+      )}
+    />
+  </>
+) : (
+  <Section title="Search Results" list={movies} />
+)}
+
+        
       </main>
     </div>
   );
 }
 
-/* ================= SECTION ================= */
+/* ================= ROW SECTION ================= */
 
 function Section({ title, list, progress }) {
   if (!list.length) return null;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 pb-14">
+    <div className="mx-auto max-w-7xl px-4 pb-10">
       <h2 className="mb-3 text-xl font-semibold">{title}</h2>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      <div className="flex gap-4 overflow-x-auto scrollbar-hide">
         {list.map((movie) => {
           const saved = JSON.parse(localStorage.getItem("progress-" + movie._id));
           const percent = saved ? Math.min((saved.time / 3600) * 100, 100) : 0;
@@ -206,18 +252,15 @@ function Section({ title, list, progress }) {
               to={`/details/${movie._id}`}
               className="group relative overflow-hidden rounded-lg"
             >
-              {/* Poster only */}
               <img
                 src={getThumbnailUrl(movie.thumbnailUrl)}
-                className="aspect-[2/3] w-full object-cover transition group-hover:scale-105"
+                className="h-60 min-w-[160px] object-cover transition group-hover:scale-105"
               />
 
-              {/* Title hover */}
               <div className="absolute bottom-0 w-full translate-y-full p-2 text-sm font-semibold transition group-hover:translate-y-0 bg-black/60">
                 {movie.title}
               </div>
 
-              {/* Progress bar */}
               {progress && saved && (
                 <>
                   <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/30">
@@ -239,4 +282,3 @@ function Section({ title, list, progress }) {
     </div>
   );
 }
-

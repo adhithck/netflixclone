@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 
 import Navbar from "../components/layout/Navbar";
 import Loader from "../components/ui/Loader";
@@ -8,6 +8,8 @@ import { getMovieByIdApi, getStreamUrl } from "../api/movies.api";
 
 export default function Watch() {
   const { id } = useParams();
+  const navigate = useNavigate();
+
   const videoRef = useRef(null);
 
   const [movie, setMovie] = useState(null);
@@ -29,7 +31,6 @@ export default function Watch() {
         if (saved && videoRef.current) {
           videoRef.current.currentTime = saved.time;
         }
-
       } catch (err) {
         setError("Failed to load movie");
       } finally {
@@ -49,7 +50,7 @@ export default function Watch() {
       JSON.stringify({
         time: videoRef.current.currentTime,
         movie,
-      })
+      }),
     );
 
     localStorage.setItem("lastWatched", JSON.stringify(movie));
@@ -90,17 +91,16 @@ export default function Watch() {
 
       <main className="pt-20">
         <div className="mx-auto max-w-6xl px-4">
-
           {/* Header */}
           <div className="mb-4 flex items-center justify-between">
             <h1 className="text-xl font-bold">{movie.title}</h1>
 
-            <Link
-              to="/browse"
+            <button
+              onClick={() => navigate(-1)}
               className="rounded bg-white/10 px-4 py-2 text-sm hover:bg-white/20"
             >
               Back
-            </Link>
+            </button>
           </div>
 
           {/* Video Player */}
@@ -124,7 +124,6 @@ export default function Watch() {
           <div className="mt-6 text-white/70">
             <p>{movie.description}</p>
           </div>
-
         </div>
       </main>
     </div>

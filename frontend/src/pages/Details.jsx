@@ -20,6 +20,8 @@ export default function Details() {
   const [others, setOthers] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  
+
   // ================= LOAD MOVIE + OTHERS =================
   useEffect(() => {
     const load = async () => {

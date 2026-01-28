@@ -5,40 +5,46 @@ import fs from "fs";
 const videosDir = path.join(process.cwd(), "uploads/videos");
 const thumbsDir = path.join(process.cwd(), "uploads/thumbnails");
 
-if (!fs.existsSync(videosDir)) fs.mkdirSync(videosDir, { recursive: true });
-if (!fs.existsSync(thumbsDir)) fs.mkdirSync(thumbsDir, { recursive: true });
+// Create folders
+fs.mkdirSync(videosDir, { recursive: true });
+fs.mkdirSync(thumbsDir, { recursive: true });
 
+// ================= STORAGE =================
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    if (file.fieldname === "video") cb(null, videosDir);
-    else if (file.fieldname === "thumbnail") cb(null, thumbsDir);
-    else cb(new Error("Invalid field"), null);
+    if (file.fieldname === "video") return cb(null, videosDir);
+    if (file.fieldname === "thumbnail") return cb(null, thumbsDir);
+
+    cb(new Error("Invalid field"));
   },
 
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    const name = file.originalname.replace(ext, "").replace(/\s+/g, "-");
-    cb(null, `${Date.now()}-${name}${ext}`);
+    cb(null, Date.now() + path.extname(file.originalname));
   },
 });
 
+// ================= FILTER =================
 const fileFilter = (req, file, cb) => {
-  if (file.fieldname === "video" && file.mimetype === "video/mp4")
-    return cb(null, true);
+  // ✅ ACCEPT ANY VIDEO FORMAT
+  if (file.fieldname === "video") {
+    if (file.mimetype.startsWith("video/")) return cb(null, true);
+    return cb(new Error("Video file required"));
+  }
 
-  if (
-    file.fieldname === "thumbnail" &&
-    ["image/png", "image/jpeg", "image/jpg", "image/webp"].includes(file.mimetype)
-  )
-    return cb(null, true);
+  // ✅ Thumbnail images
+  if (file.fieldname === "thumbnail") {
+    if (file.mimetype.startsWith("image/")) return cb(null, true);
+    return cb(new Error("Image file required"));
+  }
 
-  cb(new Error("Invalid file type"), false);
+  cb(new Error("Invalid file"));
 };
 
+// ================= EXPORT =================
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 1024 * 1024 * 500 },
+  limits: { fileSize: 1024 * 1024 * 2000 }, // 2GB
 });
 
 export default upload;
