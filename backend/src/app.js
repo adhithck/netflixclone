@@ -11,29 +11,34 @@ import errorHandler from "./middlewares/error.middleware.js";
 
 const app = express();
 
-// Middleware
+// ================= MIDDLEWARE =================
 app.use(cors());
 app.use(express.json());
 
-// ✅ Serve uploaded files
+// ✅ VERY IMPORTANT — serve uploaded files
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
-// Root
+// ================= ROOT =================
 app.get("/", (req, res) => {
-  res.json({ message: "Netflix Clone Backend Running ✅" });
+  res.json({
+    message: "Netflix Clone Backend Running ✅",
+  });
 });
 
-// Health
+// ================= HEALTH =================
 app.get("/api/health", (req, res) => {
-  res.json({ status: "OK" });
+  res.json({
+    status: "OK",
+    time: new Date().toISOString(),
+  });
 });
 
-// Routes
+// ================= ROUTES =================
 app.use("/api/auth", authRoutes);
 app.use("/api/movies", movieRoutes);
 app.use("/api/stream", streamRoutes);
 
-// Errors
+// ================= ERRORS =================
 app.use(notFound);
 app.use(errorHandler);
 

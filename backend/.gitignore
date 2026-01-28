@@ -43,9 +43,12 @@ Thumbs.db
 .idea/
 
 # =========================
-# Uploads (Method 2 streaming)
+# Uploads (VIDEOS & THUMBNAILS ❌ GITHUB)
 # =========================
+uploads/
 backend/uploads/
+backend/uploads/videos/
+backend/uploads/thumbnails/
 
 # =========================
 # Optional test coverage
