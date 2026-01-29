@@ -5,6 +5,7 @@ import path from "path";
 import authRoutes from "./routes/auth.routes.js";
 import movieRoutes from "./routes/movie.routes.js";
 import streamRoutes from "./routes/stream.routes.js";
+import favoriteRoutes from "./routes/favorite.routes.js";
 
 import notFound from "./middlewares/notFound.middleware.js";
 import errorHandler from "./middlewares/error.middleware.js";
@@ -37,6 +38,7 @@ app.get("/api/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/movies", movieRoutes);
 app.use("/api/stream", streamRoutes);
+app.use("/api/favorites", favoriteRoutes);
 
 // ================= ERRORS =================
 app.use(notFound);

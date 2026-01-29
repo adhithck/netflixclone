@@ -4,10 +4,10 @@ import { Link } from "react-router-dom";
 import Navbar from "../components/layout/Navbar";
 import Loader from "../components/ui/Loader";
 
+import { getFavoritesApi, toggleFavoriteApi } from "../api/favorites.api";
 import {
   getAllMoviesApi,
   getThumbnailUrl,
-  searchMoviesApi,
   getStreamUrl,
 } from "../api/movies.api";
 
@@ -15,28 +15,33 @@ export default function Browse() {
   const heroRef = useRef(null);
 
   const [movies, setMovies] = useState([]);
+  const [allMovies, setAllMovies] = useState([]);
   const [continueWatching, setContinueWatching] = useState([]);
+  const [myList, setMyList] = useState([]);
   const [hero, setHero] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [fade, setFade] = useState(false);
-  const isSearching = query.trim().length > 0;
 
+  const isSearching = query.trim().length > 0;
 
   // ================= LOAD =================
   useEffect(() => {
     window.scrollTo(0, 0);
     loadMovies();
     loadContinue();
+    loadMyList();
   }, []);
 
   const loadMovies = async () => {
     setLoading(true);
+
     const data = await getAllMoviesApi();
     const list = data.movies || [];
 
     setMovies(list);
+    setAllMovies(list);
 
     const last = localStorage.getItem("lastWatched");
     setHero(last ? JSON.parse(last) : list[0]);
@@ -44,7 +49,7 @@ export default function Browse() {
     setLoading(false);
   };
 
-  // ================= CONTINUE WATCHING =================
+  // ================= CONTINUE WATCHING (LOCAL) =================
   const loadContinue = () => {
     const keys = Object.keys(localStorage).filter((k) =>
       k.startsWith("progress-")
@@ -58,9 +63,20 @@ export default function Browse() {
     setContinueWatching(list);
   };
 
-  // ================= HERO AUTO SWITCH =================
+  // ================= FAVORITES (SERVER) =================
+  const loadMyList = async () => {
+    const favs = await getFavoritesApi();
+    setMyList(favs || []);
+  };
+
+  const toggleMyList = async (movie) => {
+    const updated = await toggleFavoriteApi(movie._id);
+    setMyList(updated);
+  };
+
+  // ================= HERO AUTO =================
   useEffect(() => {
-    if (!movies.length) return;
+    if (!movies.length || isSearching) return;
 
     const timer = setInterval(() => {
       setFade(true);
@@ -75,9 +91,9 @@ export default function Browse() {
     }, 10000);
 
     return () => clearInterval(timer);
-  }, [movies]);
+  }, [movies, isSearching]);
 
-  // ================= PAUSE HERO ON SCROLL =================
+  // ================= PAUSE HERO =================
   useEffect(() => {
     const onScroll = () => {
       if (!heroRef.current) return;
@@ -90,19 +106,22 @@ export default function Browse() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // ================= SEARCH =================
-  const handleSearch = async (e) => {
-  const v = e.target.value;
-  setQuery(v);
+  // ================= SEARCH (LOCAL) =================
+  const handleSearch = (e) => {
+    const v = e.target.value;
+    setQuery(v);
 
-  if (!v.trim()) {
-    loadMovies();
-    return;
-  }
+    if (!v.trim()) {
+      setMovies(allMovies);
+      return;
+    }
 
-  const data = await searchMoviesApi(v);
-  setMovies(data.movies || []);
-};
+    const filtered = allMovies.filter((m) =>
+      m.title?.toLowerCase().includes(v.toLowerCase())
+    );
+
+    setMovies(filtered);
+  };
 
   if (loading) return <Loader text="Loading Netflix..." />;
 
@@ -123,7 +142,6 @@ export default function Browse() {
 
         {/* HERO */}
         {hero && !isSearching && (
-
           <div
             className={`relative h-[65vh] transition-opacity duration-500 ${
               fade ? "opacity-0" : "opacity-100"
@@ -141,7 +159,7 @@ export default function Browse() {
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
 
             <div className="relative z-10 h-full max-w-7xl mx-auto px-6 flex flex-col justify-end pb-16">
-              <h1 className="text-4xl font-bold max-w-xl">{hero.title}</h1>
+              <h1 className="text-4xl font-bold">{hero.title}</h1>
 
               <Link
                 to={`/watch/${hero._id}`}
@@ -153,88 +171,30 @@ export default function Browse() {
           </div>
         )}
 
-        {/* ROWS */}
-        <Section title="Continue Watching" list={continueWatching} progress />
+        {/* SEARCH RESULTS */}
+        {isSearching && (
+          <Section title="Search Results" list={movies} toggleMyList={toggleMyList} />
+        )}
 
-       {!isSearching ? (
-  <>
-   {!isSearching ? (
-  <>
-    <Section title="Trending" list={movies.slice(0, 10)} />
-
-    <Section
-      title="Action"
-      list={movies.filter((m) =>
-        m.genre?.toLowerCase().includes("action")
-      )}
-    />
-
-    <Section
-      title="Horror"
-      list={movies.filter((m) =>
-        m.genre?.toLowerCase().includes("horror")
-      )}
-    />
-
-    <Section
-      title="Drama"
-      list={movies.filter((m) =>
-        m.genre?.toLowerCase().includes("drama")
-      )}
-    />
-
-    <Section
-      title="SciFi"
-      list={movies.filter((m) =>
-        m.genre?.toLowerCase().includes("scifi")
-      )}
-    />
-  </>
-) : (
-  <Section title="Search Results" list={movies} />
-)}
-
-    <Section
-      title="Action"
-      list={movies.filter((m) =>
-        m.genre?.toLowerCase().includes("action")
-      )}
-    />
-
-    <Section
-      title="Horror"
-      list={movies.filter((m) =>
-        m.genre?.toLowerCase().includes("horror")
-      )}
-    />
-
-    <Section
-      title="Drama"
-      list={movies.filter((m) =>
-        m.genre?.toLowerCase().includes("drama")
-      )}
-    />
-
-    <Section
-      title="SciFi"
-      list={movies.filter((m) =>
-        m.genre?.toLowerCase().includes("scifi")
-      )}
-    />
-  </>
-) : (
-  <Section title="Search Results" list={movies} />
-)}
-
-        
+        {!isSearching && (
+          <>
+            <Section title="Continue Watching" list={continueWatching} progress toggleMyList={toggleMyList} />
+            <Section title="My List" list={myList} toggleMyList={toggleMyList} />
+            <Section title="Trending" list={movies.slice(0, 10)} toggleMyList={toggleMyList} />
+            <Section title="Action" list={movies.filter(m=>m.genre?.toLowerCase().includes("action"))} toggleMyList={toggleMyList} />
+            <Section title="Horror" list={movies.filter(m=>m.genre?.toLowerCase().includes("horror"))} toggleMyList={toggleMyList} />
+            <Section title="Drama" list={movies.filter(m=>m.genre?.toLowerCase().includes("drama"))} toggleMyList={toggleMyList} />
+            <Section title="SciFi" list={movies.filter(m=>m.genre?.toLowerCase().includes("scifi"))} toggleMyList={toggleMyList} />
+          </>
+        )}
       </main>
     </div>
   );
 }
 
-/* ================= ROW SECTION ================= */
+/* ================= ROW ================= */
 
-function Section({ title, list, progress }) {
+function Section({ title, list, progress, toggleMyList }) {
   if (!list.length) return null;
 
   return (
@@ -247,33 +207,30 @@ function Section({ title, list, progress }) {
           const percent = saved ? Math.min((saved.time / 3600) * 100, 100) : 0;
 
           return (
-            <Link
-              key={movie._id}
-              to={`/details/${movie._id}`}
-              className="group relative overflow-hidden rounded-lg"
-            >
+            <Link key={movie._id} to={`/details/${movie._id}`} className="group relative">
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  toggleMyList(movie);
+                }}
+                className="absolute top-2 left-2 z-10 bg-black/70 px-2 rounded"
+              >
+                ❤️
+              </button>
+
               <img
                 src={getThumbnailUrl(movie.thumbnailUrl)}
-                className="h-60 min-w-[160px] object-cover transition group-hover:scale-105"
+                className="h-60 min-w-[160px] rounded-lg object-cover transition group-hover:scale-105"
               />
 
-              <div className="absolute bottom-0 w-full translate-y-full p-2 text-sm font-semibold transition group-hover:translate-y-0 bg-black/60">
+              <div className="absolute bottom-0 w-full bg-black/60 p-2 text-sm">
                 {movie.title}
               </div>
 
               {progress && saved && (
-                <>
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/30">
-                    <div
-                      className="h-full bg-red-600"
-                      style={{ width: `${percent}%` }}
-                    />
-                  </div>
-
-                  <span className="absolute top-1 right-1 bg-black/70 px-1 text-xs">
-                    {percent.toFixed(0)}%
-                  </span>
-                </>
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/30">
+                  <div className="h-full bg-red-600" style={{ width: `${percent}%` }} />
+                </div>
               )}
             </Link>
           );

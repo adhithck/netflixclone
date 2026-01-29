@@ -25,10 +25,19 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+    // ✅ Favorites (My List)
+    favorites: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Movie",
+      },
+    ],
   },
   { timestamps: true }
 );
 
-const User = mongoose.model("User", userSchema);
+// ✅ Prevent model overwrite (important for nodemon)
+const User = mongoose.models.User || mongoose.model("User", userSchema);
 
 export default User;
