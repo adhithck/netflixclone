@@ -16,13 +16,11 @@ const movieSchema = new mongoose.Schema(
     thumbnailUrl: {
       type: String,
       required: true,
-      // Example: "uploads/thumbnails/abc.jpg"
     },
 
     videoUrl: {
       type: String,
       required: true,
-      // Example: "uploads/videos/abc.mp4"
     },
 
     genre: {
@@ -40,7 +38,14 @@ const movieSchema = new mongoose.Schema(
       default: "0 min",
     },
 
+    // OLD (kept for safety)
     isPremium: {
+      type: Boolean,
+      default: false,
+    },
+
+    // ⭐ NEW (frontend uses this)
+    premiumOnly: {
       type: Boolean,
       default: false,
     },

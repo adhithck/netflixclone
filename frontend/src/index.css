@@ -7,3 +7,29 @@
 .animate-fade {
   animation: fade .8s ease-in;
 }
+/* ================= NETFLIX STYLE HIDDEN SCROLLBARS ================= */
+
+/* Hide vertical + horizontal scrollbar (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}
+
+/* Firefox */
+html {
+  scrollbar-width: none;
+}
+
+/* Prevent horizontal page overflow */
+body {
+  overflow-x: hidden;
+}
+
+/* Hide row scrollbars but keep scroll */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  scrollbar-width: none;
+}

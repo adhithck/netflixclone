@@ -37,8 +37,12 @@ export default function Login() {
       <div className="mx-auto flex min-h-screen max-w-md items-center px-4">
         <form
           onSubmit={handleSubmit}
-          className="w-full rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl"
+          className="w-full rounded-2xl border border-yellow-500/40 bg-white/5 p-6 shadow-xl"
         >
+          <div className="mb-4 rounded bg-yellow-500/10 p-3 text-center text-sm text-yellow-400">
+            ⭐ Premium members unlock all movies & premieres
+          </div>
+
           <h1 className="text-2xl font-bold">Sign In</h1>
           <p className="mt-1 text-sm text-white/60">Login to continue</p>
 

@@ -3,7 +3,19 @@ import Movie from "../models/Movie.model.js";
 // ================= ADD MOVIE =================
 export const addMovie = async (req, res) => {
   try {
-    const { title, description, genre, year, duration } = req.body;
+    const {
+      title,
+      description,
+      genre,
+      year,
+      duration,
+
+      // ⭐ NEW
+      premiumOnly,
+      isPremiere,
+      premiereAt,
+      premiereUntil,
+    } = req.body;
 
     // SINGLE files from multer
     const video = req.files?.video?.[0];
@@ -21,6 +33,12 @@ export const addMovie = async (req, res) => {
       genre: genre || "Unknown",
       year: year || new Date().getFullYear(),
       duration: duration || "0 min",
+
+      // ⭐ PREMIUM / PREMIERE
+      premiumOnly: premiumOnly === "true" || premiumOnly === true,
+      isPremiere: isPremiere === "true" || isPremiere === true,
+      premiereAt: premiereAt || null,
+      premiereUntil: premiereUntil || null,
 
       videoUrl: `uploads/videos/${video.filename}`,
       thumbnailUrl: `uploads/thumbnails/${thumbnail.filename}`,
@@ -51,6 +69,12 @@ export const getMovieById = async (req, res) => {
   try {
     const movie = await Movie.findById(req.params.id);
     if (!movie) return res.status(404).json({ message: "Movie not found" });
+
+    // 🔒 PREMIUM BLOCK
+    if (movie.premiumOnly && !req.user?.isPremium) {
+      return res.status(403).json({ message: "Premium members only 🔒" });
+    }
+
     res.json(movie);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -77,7 +101,9 @@ export const updateMovie = async (req, res) => {
     const movie = await Movie.findById(req.params.id);
     if (!movie) return res.status(404).json({ message: "Movie not found" });
 
+    // allow update of premium + premiere fields
     Object.assign(movie, req.body);
+
     await movie.save();
 
     res.json({ message: "Movie updated ✅", movie });

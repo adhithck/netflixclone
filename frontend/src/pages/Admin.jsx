@@ -17,6 +17,8 @@ export default function Admin() {
     genre: "",
     year: "",
     duration: "",
+    isPremiere: false, // 🎬
+    premiumOnly: false, // 🔒 PREMIUM
   });
 
   const [video, setVideo] = useState(null);
@@ -61,6 +63,8 @@ export default function Admin() {
       fd.append("genre", form.genre);
       fd.append("year", form.year);
       fd.append("duration", form.duration);
+      fd.append("isPremiere", form.isPremiere); // 🎬
+      fd.append("premiumOnly", form.premiumOnly); // 🔒
       fd.append("video", video);
       fd.append("thumbnail", thumbnail);
 
@@ -74,6 +78,8 @@ export default function Admin() {
         genre: "",
         year: "",
         duration: "",
+        isPremiere: false,
+        premiumOnly: false,
       });
 
       setVideo(null);
@@ -93,6 +99,24 @@ export default function Admin() {
     if (!window.confirm("Delete this movie?")) return;
 
     await deleteMovieApi(id);
+    loadMovies();
+  };
+
+  // ================= TOGGLE PREMIERE =================
+  const togglePremiere = async (movie) => {
+    const fd = new FormData();
+    fd.append("isPremiere", !movie.isPremiere);
+
+    await uploadMovieApi(fd, movie._id);
+    loadMovies();
+  };
+
+  // ================= TOGGLE PREMIUM =================
+  const togglePremium = async (movie) => {
+    const fd = new FormData();
+    fd.append("premiumOnly", !movie.premiumOnly);
+
+    await uploadMovieApi(fd, movie._id);
     loadMovies();
   };
 
@@ -146,6 +170,30 @@ export default function Admin() {
               setForm({ ...form, description: e.target.value })
             }
           />
+
+          {/* 🎬 PREMIERE */}
+          <label className="col-span-2 flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={form.isPremiere}
+              onChange={(e) =>
+                setForm({ ...form, isPremiere: e.target.checked })
+              }
+            />
+            Mark as Premiere
+          </label>
+
+          {/* 🔒 PREMIUM */}
+          <label className="col-span-2 flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={form.premiumOnly}
+              onChange={(e) =>
+                setForm({ ...form, premiumOnly: e.target.checked })
+              }
+            />
+            Premium Only
+          </label>
 
           {/* FILES */}
           <div className="col-span-2 flex flex-wrap gap-4">
@@ -202,10 +250,38 @@ export default function Admin() {
                 alt=""
               />
 
+              {/* 🎬 PREMIERE BADGE */}
+              {m.isPremiere && (
+                <span className="absolute top-2 left-2 rounded bg-red-600 px-2 py-1 text-xs font-semibold">
+                  PREMIERE
+                </span>
+              )}
+
+              {/* 🔒 PREMIUM BADGE */}
+              {m.premiumOnly && (
+                <span className="absolute top-2 right-2 rounded bg-yellow-500 px-2 py-1 text-xs font-semibold text-black">
+                  PREMIUM
+                </span>
+              )}
+
               <div className="absolute inset-0 bg-black/60 opacity-0 transition group-hover:opacity-100" />
 
               <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 transition group-hover:opacity-100">
                 <p className="font-semibold">{m.title}</p>
+
+                <button
+                  onClick={() => togglePremiere(m)}
+                  className="mt-2 w-full rounded bg-yellow-600 py-1 text-sm hover:bg-yellow-700"
+                >
+                  Toggle Premiere
+                </button>
+
+                <button
+                  onClick={() => togglePremium(m)}
+                  className="mt-2 w-full rounded bg-blue-600 py-1 text-sm hover:bg-blue-700"
+                >
+                  Toggle Premium
+                </button>
 
                 <button
                   onClick={() => deleteMovie(m._id)}

@@ -26,6 +26,18 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
 
+    // ⭐ Premium flag (manual)
+    isPremium: {
+      type: Boolean,
+      default: false,
+    },
+
+    // ⭐ Premium expiry
+    premiumUntil: {
+      type: Date,
+      default: null,
+    },
+
     // ✅ Favorites (My List)
     favorites: [
       {
@@ -37,7 +49,7 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// ✅ Prevent model overwrite (important for nodemon)
+// ✅ Prevent model overwrite
 const User = mongoose.models.User || mongoose.model("User", userSchema);
 
 export default User;

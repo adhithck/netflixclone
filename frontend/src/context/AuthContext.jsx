@@ -8,6 +8,10 @@ export default function AuthProvider({ children }) {
   const [token, setToken] = useState(localStorage.getItem("token") || "");
   const [loading, setLoading] = useState(true);
 
+  // ⭐ Premium with expiry
+  const isPremium =
+    user?.premiumUntil && new Date(user.premiumUntil) > new Date();
+
   // ✅ Load user profile if token exists
   useEffect(() => {
     const loadProfile = async () => {
@@ -19,13 +23,10 @@ export default function AuthProvider({ children }) {
         }
 
         const profile = await profileApi();
+
         setUser(profile);
       } catch (error) {
         console.log("Profile error:", error?.response?.data || error.message);
-
-        // ✅ IMPORTANT FIX:
-        // Do NOT remove token here while testing
-        // only set user null
         setUser(null);
       } finally {
         setLoading(false);
@@ -43,7 +44,6 @@ export default function AuthProvider({ children }) {
       localStorage.setItem("token", res.token);
       setToken(res.token);
 
-      // ✅ optional: set user from response
       if (res.user) setUser(res.user);
     }
 
@@ -58,11 +58,18 @@ export default function AuthProvider({ children }) {
       localStorage.setItem("token", res.token);
       setToken(res.token);
 
-      // ✅ optional: set user from response
       if (res.user) setUser(res.user);
     }
 
     return res;
+  };
+
+  // ⭐ TEMP helper (kept)
+  const upgradeToPremium = () => {
+    setUser((u) => ({
+      ...u,
+      premiumUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    }));
   };
 
   // ✅ Logout
@@ -79,9 +86,11 @@ export default function AuthProvider({ children }) {
         token,
         loading,
         isLoggedIn: !!token,
+        isPremium,
         register,
         login,
         logout,
+        upgradeToPremium,
       }}
     >
       {children}

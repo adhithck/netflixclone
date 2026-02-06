@@ -2,6 +2,10 @@ import bcrypt from "bcryptjs";
 import User from "../models/User.model.js";
 import generateToken from "../utils/generateToken.js";
 
+// helper
+const isPremiumActive = (user) =>
+  user.isPremium && user.premiumUntil && new Date(user.premiumUntil) > new Date();
+
 // ✅ Register
 export const registerUser = async (req, res) => {
   try {
@@ -24,6 +28,8 @@ export const registerUser = async (req, res) => {
       email,
       password: hashedPassword,
       isAdmin: false,
+      isPremium: false,
+      premiumUntil: null,
     });
 
     return res.status(201).json({
@@ -33,6 +39,8 @@ export const registerUser = async (req, res) => {
         name: user.name,
         email: user.email,
         isAdmin: user.isAdmin,
+        isPremium: isPremiumActive(user),
+        premiumUntil: user.premiumUntil,
       },
       token: generateToken(user._id),
     });
@@ -69,6 +77,8 @@ export const loginUser = async (req, res) => {
         name: user.name,
         email: user.email,
         isAdmin: user.isAdmin,
+        isPremium: isPremiumActive(user),
+        premiumUntil: user.premiumUntil,
       },
       token: generateToken(user._id),
     });
@@ -81,7 +91,11 @@ export const loginUser = async (req, res) => {
 export const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select("-password");
-    return res.status(200).json(user);
+
+    res.status(200).json({
+      ...user.toObject(),
+      isPremium: isPremiumActive(user),
+    });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
