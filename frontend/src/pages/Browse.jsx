@@ -56,7 +56,7 @@ export default function Browse() {
 
   const loadContinue = () => {
     const keys = Object.keys(localStorage).filter((k) =>
-      k.startsWith("progress-")
+      k.startsWith("progress-"),
     );
 
     const list = keys
@@ -84,7 +84,7 @@ export default function Browse() {
     }
 
     const filtered = allMovies.filter((m) =>
-      m.title?.toLowerCase().includes(query.toLowerCase())
+      m.title?.toLowerCase().includes(query.toLowerCase()),
     );
 
     setMovies(filtered);
@@ -113,7 +113,7 @@ export default function Browse() {
     return () => clearInterval(timer);
   }, [movies, isSearching]);
 
-  // 💳 Razorpay (ONLY NEW PART)
+  // 💳 Razorpay (unchanged)
   const buyPremium = () => {
     const options = {
       key: "rzp_test_123456",
@@ -139,7 +139,6 @@ export default function Browse() {
       <Navbar />
 
       <main className="pt-28">
-
         {!isPremium && (
           <div className="mx-auto max-w-7xl px-6 mb-6">
             <div className="rounded-xl border border-yellow-400/40 bg-yellow-400/10 p-4 flex items-center justify-between">
@@ -147,12 +146,12 @@ export default function Browse() {
                 🔒 Premium required to watch movies
               </p>
 
-              <button
-                onClick={buyPremium}
+              <Link
+                to="/premium"
                 className="rounded bg-red-600 px-6 py-2 font-semibold"
               >
                 Upgrade ₹199
-              </button>
+              </Link>
             </div>
           </div>
         )}
@@ -175,19 +174,73 @@ export default function Browse() {
         )}
 
         {isSearching && (
-          <Section title="Search Results" list={movies} toggleMyList={toggleMyList} myList={myList} />
+          <Section
+            title="Search Results"
+            list={movies}
+            toggleMyList={toggleMyList}
+            myList={myList}
+          />
         )}
 
         {!isSearching && (
           <>
-            <Section title="Premiere" list={premiereMovies} toggleMyList={toggleMyList} myList={myList} />
-            <Section title="Continue Watching" list={continueWatching} progress toggleMyList={toggleMyList} myList={myList} />
-            <Section title="My List" list={myList} toggleMyList={toggleMyList} myList={myList} />
-            <Section title="Trending" list={movies.slice(0, 10)} toggleMyList={toggleMyList} myList={myList} />
-            <Section title="Action" list={movies.filter(m=>m.genre?.toLowerCase().includes("action"))} toggleMyList={toggleMyList} myList={myList} />
-            <Section title="Horror" list={movies.filter(m=>m.genre?.toLowerCase().includes("horror"))} toggleMyList={toggleMyList} myList={myList} />
-            <Section title="Drama" list={movies.filter(m=>m.genre?.toLowerCase().includes("drama"))} toggleMyList={toggleMyList} myList={myList} />
-            <Section title="SciFi" list={movies.filter(m=>m.genre?.toLowerCase().includes("scifi"))} toggleMyList={toggleMyList} myList={myList} />
+            <Section
+              title="Premiere"
+              list={premiereMovies}
+              toggleMyList={toggleMyList}
+              myList={myList}
+            />
+            <Section
+              title="Continue Watching"
+              list={continueWatching}
+              progress
+              toggleMyList={toggleMyList}
+              myList={myList}
+            />
+            <Section
+              title="My List"
+              list={myList}
+              toggleMyList={toggleMyList}
+              myList={myList}
+            />
+            <Section
+              title="Trending"
+              list={movies.slice(0, 10)}
+              toggleMyList={toggleMyList}
+              myList={myList}
+            />
+            <Section
+              title="Action"
+              list={movies.filter((m) =>
+                m.genre?.toLowerCase().includes("action"),
+              )}
+              toggleMyList={toggleMyList}
+              myList={myList}
+            />
+            <Section
+              title="Horror"
+              list={movies.filter((m) =>
+                m.genre?.toLowerCase().includes("horror"),
+              )}
+              toggleMyList={toggleMyList}
+              myList={myList}
+            />
+            <Section
+              title="Drama"
+              list={movies.filter((m) =>
+                m.genre?.toLowerCase().includes("drama"),
+              )}
+              toggleMyList={toggleMyList}
+              myList={myList}
+            />
+            <Section
+              title="SciFi"
+              list={movies.filter((m) =>
+                m.genre?.toLowerCase().includes("scifi"),
+              )}
+              toggleMyList={toggleMyList}
+              myList={myList}
+            />
           </>
         )}
       </main>
@@ -206,13 +259,19 @@ function Section({ title, list, progress, toggleMyList, myList }) {
 
       <div className="flex gap-4 overflow-x-auto scrollbar-hide">
         {list.map((movie) => {
-          const saved = JSON.parse(localStorage.getItem("progress-" + movie._id));
+          const saved = JSON.parse(
+            localStorage.getItem("progress-" + movie._id),
+          );
           const percent = saved ? Math.min((saved.time / 3600) * 100, 100) : 0;
 
           const isSaved = myList?.some((m) => m._id === movie._id);
 
           return (
-            <Link key={movie._id} to={`/details/${movie._id}`} className="group relative">
+            <Link
+              key={movie._id}
+              to={`/details/${movie._id}`}
+              className="group relative"
+            >
               <button
                 onClick={(e) => {
                   e.preventDefault();
@@ -220,7 +279,11 @@ function Section({ title, list, progress, toggleMyList, myList }) {
                 }}
                 className="absolute top-2 left-2 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-black/70 border border-white/30 opacity-0 group-hover:opacity-100 transition hover:scale-110"
               >
-                {isSaved ? <FaCheck className="text-green-400 text-sm" /> : <FaPlus className="text-white text-sm" />}
+                {isSaved ? (
+                  <FaCheck className="text-green-400 text-sm" />
+                ) : (
+                  <FaPlus className="text-white text-sm" />
+                )}
               </button>
 
               <img
@@ -228,9 +291,17 @@ function Section({ title, list, progress, toggleMyList, myList }) {
                 className="h-60 min-w-[160px] rounded-lg object-cover transition group-hover:scale-105"
               />
 
+              {/* ✅ MOVIE TITLE (ONLY NEW ADDITION) */}
+              <div className="absolute bottom-0 w-full bg-black/60 p-2 text-sm">
+                {movie.title}
+              </div>
+
               {progress && saved && (
                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/30">
-                  <div className="h-full bg-red-600" style={{ width: `${percent}%` }} />
+                  <div
+                    className="h-full bg-red-600"
+                    style={{ width: `${percent}%` }}
+                  />
                 </div>
               )}
             </Link>

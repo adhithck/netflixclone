@@ -7,6 +7,7 @@ import Browse from "../pages/Browse";
 import Details from "../pages/Details";
 import Watch from "../pages/Watch";
 import Admin from "../pages/Admin";
+import PremiumPayment from "../pages/PremiumPayment";
 
 import { useAuth } from "../hooks/useAuth";
 
@@ -111,7 +112,7 @@ export default function AppRoutes() {
           </AdminRoute>
         }
       />
-
+      <Route path="/premium" element={<PremiumPayment />} />
       {/* FALLBACK */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
