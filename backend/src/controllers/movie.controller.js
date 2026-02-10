@@ -10,14 +10,14 @@ export const addMovie = async (req, res) => {
       year,
       duration,
 
-      // ⭐ NEW
+      // ⭐ PREMIUM / PREMIERE
       premiumOnly,
       isPremiere,
       premiereAt,
       premiereUntil,
     } = req.body;
 
-    // SINGLE files from multer
+    // files from multer
     const video = req.files?.video?.[0];
     const thumbnail = req.files?.thumbnail?.[0];
 
@@ -34,7 +34,7 @@ export const addMovie = async (req, res) => {
       year: year || new Date().getFullYear(),
       duration: duration || "0 min",
 
-      // ⭐ PREMIUM / PREMIERE
+      // ⭐ PREMIUM / PREMIERE FLAGS
       premiumOnly: premiumOnly === "true" || premiumOnly === true,
       isPremiere: isPremiere === "true" || isPremiere === true,
       premiereAt: premiereAt || null,
@@ -54,7 +54,7 @@ export const addMovie = async (req, res) => {
   }
 };
 
-// ================= GET ALL =================
+// ================= GET ALL MOVIES =================
 export const getAllMovies = async (req, res) => {
   try {
     const movies = await Movie.find().sort({ createdAt: -1 });
@@ -64,15 +64,19 @@ export const getAllMovies = async (req, res) => {
   }
 };
 
-// ================= GET ONE =================
+// ================= GET ONE MOVIE =================
 export const getMovieById = async (req, res) => {
   try {
     const movie = await Movie.findById(req.params.id);
-    if (!movie) return res.status(404).json({ message: "Movie not found" });
+    if (!movie) {
+      return res.status(404).json({ message: "Movie not found" });
+    }
 
-    // 🔒 PREMIUM BLOCK
+    // 🔒 BLOCK NON-PREMIUM USERS
     if (movie.premiumOnly && !req.user?.isPremium) {
-      return res.status(403).json({ message: "Premium members only 🔒" });
+      return res.status(403).json({
+        message: "Premium members only 🔒",
+      });
     }
 
     res.json(movie);
@@ -81,7 +85,7 @@ export const getMovieById = async (req, res) => {
   }
 };
 
-// ================= SEARCH =================
+// ================= SEARCH MOVIES =================
 export const searchMovies = async (req, res) => {
   try {
     const q = req.query.q || "";
@@ -95,24 +99,28 @@ export const searchMovies = async (req, res) => {
   }
 };
 
-// ================= UPDATE =================
+// ================= UPDATE MOVIE =================
 export const updateMovie = async (req, res) => {
   try {
     const movie = await Movie.findById(req.params.id);
-    if (!movie) return res.status(404).json({ message: "Movie not found" });
+    if (!movie) {
+      return res.status(404).json({ message: "Movie not found" });
+    }
 
-    // allow update of premium + premiere fields
+    // allow updating premium / premiere fields
     Object.assign(movie, req.body);
-
     await movie.save();
 
-    res.json({ message: "Movie updated ✅", movie });
+    res.json({
+      message: "Movie updated ✅",
+      movie,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// ================= DELETE =================
+// ================= DELETE MOVIE =================
 export const deleteMovie = async (req, res) => {
   try {
     await Movie.findByIdAndDelete(req.params.id);

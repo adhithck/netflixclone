@@ -9,11 +9,11 @@ import protect from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-// Auth
+// ================= AUTH =================
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 
-// Profile
+// ================= PROFILE =================
 router.get("/profile", protect, getProfile);
 
 export default router;
